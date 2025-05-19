@@ -33,24 +33,24 @@ from gr00t.utils.peft import get_lora_model
 
 @dataclass
 class Config:
-    """Configuration for GR00T model fine-tuning."""
+    """Configuration for GR00T model fine-tuning on G1 Block Stacking Dataset."""
 
     # Dataset parameters
-    dataset_path: str
-    """Path to the dataset directory."""
+    dataset_path: str = "datasets/G1_BlockStacking_Dataset"
+    """Path to the G1 Block Stacking Dataset directory."""
 
-    output_dir: str = "/tmp/gr00t"
-    """Directory to save model checkpoints."""
+    output_dir: str = "output/"
+    """Directory to save G1 model checkpoints."""
 
-    data_config: str = "gr1_arms_only"
-    """Data configuration name from DATA_CONFIG_MAP."""
+    data_config: str = "g1_block_stacking"
+    """Data configuration name for G1 Block Stacking from DATA_CONFIG_MAP."""
 
     # Training parameters
     batch_size: int = 8
-    """Batch size per GPU for training."""
+    """Batch size per GPU for training (adjusted for G1 dataset)."""
 
     max_steps: int = 10000
-    """Maximum number of training steps."""
+    """Maximum number of training steps (aligned with G1 10k finetuning results)."""
 
     num_gpus: int = 1
     """Number of GPUs to use for training."""
@@ -66,13 +66,13 @@ class Config:
     """Whether to fine-tune the language model backbone."""
 
     tune_visual: bool = True
-    """Whether to fine-tune the vision tower."""
+    """Whether to tune the visual encoder (recommended for G1)."""
 
     tune_projector: bool = True
-    """Whether to fine-tune the projector."""
+    """Whether to tune the projector."""
 
     tune_diffusion_model: bool = True
-    """Whether to fine-tune the diffusion model."""
+    """Whether to tune the diffusion model."""
 
     resume: bool = False
     """Whether to resume from a checkpoint."""
@@ -87,7 +87,7 @@ class Config:
     warmup_ratio: float = 0.05
     """Ratio of total training steps used for warmup."""
 
-    lora_rank: int = 1
+    lora_rank: int = 16
     """Rank for the LORA model."""
 
     lora_alpha: int = 16
@@ -99,15 +99,15 @@ class Config:
     dataloader_num_workers: int = 8
     """Number of workers for data loading."""
 
-    report_to: str = "wandb"
+    report_to: str = "tensorboard"
     """Where to report training metrics (e.g., 'wandb', 'tensorboard')."""
 
     # Data loading parameters
     embodiment_tag: str = "new_embodiment"
-    """Embodiment tag to use for training. e.g. 'new_embodiment', 'gr1'"""
+    """Embodiment tag to use for G1 training."""
 
-    video_backend: str = "decord"
-    """Video backend to use for training. [decord, torchvision_av]"""
+    video_backend: str = "torchvision_av"
+    """Video backend to use for G1 training (aligned with notebook)."""
 
 
 #####################################################################################
@@ -116,7 +116,7 @@ class Config:
 
 
 def main(config: Config):
-    """Main training function."""
+    """Main training function for G1 Block Stacking Dataset."""
     # ------------ step 1: load dataset ------------
     embodiment_tag = EmbodimentTag(config.embodiment_tag)
 
@@ -130,17 +130,17 @@ def main(config: Config):
         dataset_path=config.dataset_path,
         modality_configs=modality_configs,
         transforms=transforms,
-        embodiment_tag=embodiment_tag,  # This will override the dataset's embodiment tag to "new_embodiment"
+        embodiment_tag=embodiment_tag,
         video_backend=config.video_backend,
     )
 
     # ------------ step 2: load model ------------
     model = GR00T_N1.from_pretrained(
         pretrained_model_name_or_path=config.base_model_path,
-        tune_llm=config.tune_llm,  # backbone's LLM
-        tune_visual=config.tune_visual,  # backbone's vision tower
-        tune_projector=config.tune_projector,  # action head's projector
-        tune_diffusion_model=config.tune_diffusion_model,  # action head's DiT
+        tune_llm=config.tune_llm,
+        tune_visual=config.tune_visual,
+        tune_projector=config.tune_projector,
+        tune_diffusion_model=config.tune_diffusion_model,
     )
 
     # Set the model's compute_dtype to bfloat16
@@ -210,7 +210,7 @@ if __name__ == "__main__":
 
     # Print the tyro config
     print("\n" + "=" * 50)
-    print("GR00T FINE-TUNING CONFIGURATION:")
+    print("GR00T FINE-TUNING CONFIGURATION FOR G1 BLOCK STACKING:")
     print("=" * 50)
     for key, value in vars(config).items():
         print(f"{key}: {value}")
@@ -245,20 +245,18 @@ if __name__ == "__main__":
                 "torchrun",
                 "--standalone",
                 f"--nproc_per_node={config.num_gpus}",
-                "--nnodes=1",  # default to 1 node for now
+                "--nnodes=1",
                 str(script_path),
             ]
 
             # Convert config to command line arguments
             for key, value in vars(config).items():
                 if isinstance(value, bool):
-                    # For boolean values, use --flag or --no-flag format
                     if value:
                         cmd.append(f"--{key.replace('_', '-')}")
                     else:
                         cmd.append(f"--no-{key.replace('_', '-')}")
                 else:
-                    # For non-boolean values, use --key value format
                     cmd.append(f"--{key.replace('_', '-')}")
                     cmd.append(str(value))
             print("Running torchrun command: ", cmd)
