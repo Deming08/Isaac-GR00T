@@ -29,13 +29,13 @@ from gr00t.model.policy import Gr00tPolicy
 class ArgsConfig:
     """Command line arguments for the inference service."""
 
-    model_path: str = "nvidia/GR00T-N1.5-3B"
+    model_path: str = "/home/asus/Downloads/g1_cabinet_pour_checkpoints/N1_5_fft_500k_visual_ds4/checkpoint-500000/"
     """Path to the model checkpoint directory."""
 
-    embodiment_tag: Literal[tuple(EMBODIMENT_TAG_MAPPING.keys())] = "gr1"
+    embodiment_tag: Literal[tuple(EMBODIMENT_TAG_MAPPING.keys())] = "new_embodiment"
     """The embodiment tag for the model."""
 
-    data_config: Literal[tuple(DATA_CONFIG_MAP.keys())] = "fourier_gr1_arms_waist"
+    data_config: Literal[tuple(DATA_CONFIG_MAP.keys())] = "unitree_g1"
     """The name of the data config to use."""
 
     port: int = 5555

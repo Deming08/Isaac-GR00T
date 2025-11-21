@@ -116,12 +116,12 @@ def calc_mse_for_single_trajectory(
             # put a dot every ACTION_HORIZON
             for j in range(0, steps, action_horizon):
                 if j == 0:
-                    ax.plot(j, gt_action_across_time[j, i], "ro", label="inference point")
+                    ax.plot(j, gt_action_across_time[j, i], "ro", label="inference point", markersize=2)
                 else:
-                    ax.plot(j, gt_action_across_time[j, i], "ro")
+                    ax.plot(j, gt_action_across_time[j, i], "ro", markersize=2)
 
             ax.set_title(f"Action {i}")
-            ax.legend()
+            #ax.legend()
 
         plt.tight_layout()
         plt.show()
