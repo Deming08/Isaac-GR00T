@@ -29,7 +29,7 @@ from gr00t.model.policy import Gr00tPolicy
 class ArgsConfig:
     """Command line arguments for the inference service."""
 
-    model_path: str = "/home/asus/Downloads/g1_cabinet_pour_checkpoints/N1_5_fft_500k_visual_ds4/checkpoint-500000/"
+    model_path: str = "/home/asus/GR00T_finetune_checkpoints/g1_inspire_N1_5_fft_200k_visual_ds4_lr1e-4_noBalanceDataset/checkpoint-200000/"
     """Path to the model checkpoint directory."""
 
     embodiment_tag: Literal[tuple(EMBODIMENT_TAG_MAPPING.keys())] = "new_embodiment"
